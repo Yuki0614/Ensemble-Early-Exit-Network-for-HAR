@@ -1,5 +1,7 @@
 import torch
 from torch import nn
+from load_data import dataset_name
+from load_data import category_dict
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class layer(nn.Module):
@@ -92,18 +94,59 @@ class Net_EE(nn.Module):
     def forward(self, x):
         res = []
         Mark = 0
-        ensemble_indices = [[], [0, 1], [2, 3, 4], [5, 6, 7, 8]]
-        for i, (bb, ee) in enumerate(zip(self.backbone, self.exits), start=1):
-            x = bb(x)
-            output = ee(x)
-            if i > 1:
-                output = sum(self.ensemble[idx](res[j].detach() if self.if_train else res[j]) for j, idx in
-                             enumerate(ensemble_indices[i - 1])) + output
-            res.append(output)
-            if not self.if_train and self.exit_confidence_based(res[-1], getattr(self, f"exit_threshold{i}")):
-                Mark = i
-                return res, Mark
-        return (res, Mark) if not self.if_train else res
+        if self.if_train:
+            for i, bb, ee in zip([1,2,3,4], self.backbone, self.exits):
+                if i == 1:
+                    x = bb(x)
+                    output0 = ee(x)
+                    res.append(output0)
+                if i == 2:
+                    x = bb(x)
+                    output1 = ee(x)
+                    output1 = self.ensemble[0](output0.detach()) + self.ensemble[1](output1)
+                    res.append(output1)
+                if i == 3:
+                    x = bb(x)
+                    output2 = ee(x)
+                    output2 = self.ensemble[2](output0.detach()) + self.ensemble[3](output1.detach()) + self.ensemble[4](output2)
+                    res.append(output2)
+                if i == 4:
+                    x = bb(x)
+                    output3 = ee(x)
+                    output3 = self.ensemble[5](output0.detach()) + self.ensemble[6](output1.detach()) + self.ensemble[7](output2.detach()) + self.ensemble[8](output3)
+                    res.append(output3)
+            return res
+        else:
+            for i, bb, ee in zip([1,2,3,4], self.backbone, self.exits):
+                if i == 1:
+                    x = bb(x)
+                    output0 = ee(x)
+                    res.append(output0)
+                    if self.exit_confidence_based(res[-1], self.exit_threshold1):
+                        Mark = 1
+                        return res, Mark
+                if i == 2:
+                    x = bb(x)
+                    output1 = ee(x)
+                    output1 = self.ensemble[0](output0) + self.ensemble[1](output1)
+                    res.append(output1)
+                    if self.exit_confidence_based(res[-1], self.exit_threshold2):
+                        Mark = 2
+                        return res, Mark
+                if i == 3:
+                    x = bb(x)
+                    output2 = ee(x)
+                    output2 = self.ensemble[2](output0) + self.ensemble[3](output1) + self.ensemble[4](output2)
+                    res.append(output2)
+                    if self.exit_confidence_based(res[-1], self.exit_threshold3):
+                        Mark = 3
+                        return res, Mark
+                if i == 4:
+                    x = bb(x)
+                    output3 = ee(x)
+                    output3 = self.ensemble[5](output0) + self.ensemble[6](output1) + self.ensemble[7](output2) + self.ensemble[8](output3)
+                    res.append(output3)
+            return res, Mark
 
     def exit_confidence_based(self, x, threshold):
         prob = nn.functional.softmax(x, dim=-1)
