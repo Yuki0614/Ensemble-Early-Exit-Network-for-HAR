@@ -1,0 +1,20 @@
+name: UniMiB
+data_dir: data/UniMiB
+zip_path: data/UniMiB/UniMiB.zip
+input_shape: null
+num_classes: null
+
+model:
+  in_channels: 1
+  layers:
+    - {kernel_size: [6, 1], stride: [3, 1], out_channels: 32}
+    - {kernel_size: [3, 1], stride: [1, 1], out_channels: 32}
+    - {kernel_size: [6, 1], stride: [3, 1], out_channels: 128}
+    - {kernel_size: [3, 1], stride: [1, 1], out_channels: 128}
+    - {kernel_size: [6, 1], stride: [3, 1], out_channels: 256}
+  exit_layers: [2, 3, 4, 5]
+  ensemble_mode: ensemble
+
+dataloader:
+  train_shuffle: false
+  test_shuffle: false

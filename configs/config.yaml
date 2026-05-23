@@ -1,0 +1,19 @@
+dataset: UCI
+
+train:
+  epochs: 300
+  batch_size: 64
+  test_batch_size: 1
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  seed: 77
+  device: cuda
+  num_workers: 0
+
+loss:
+  exit_weights: [1.0, 2.0, 3.0, 4.0]
+
+output:
+  checkpoint_dir: outputs/checkpoints
+  log_dir: outputs/logs
+  result_dir: outputs/results

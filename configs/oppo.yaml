@@ -1,0 +1,20 @@
+name: OPPO
+data_dir: data/OPPO
+zip_path: data/OPPO/OPPO.zip
+input_shape: null
+num_classes: null
+
+model:
+  in_channels: 1
+  layers:
+    - {kernel_size: [3, 1], stride: [2, 1], out_channels: 16}
+    - {kernel_size: [3, 1], stride: [1, 1], out_channels: 16}
+    - {kernel_size: [3, 1], stride: [2, 1], out_channels: 64}
+    - {kernel_size: [3, 1], stride: [1, 1], out_channels: 64}
+    - {kernel_size: [3, 1], stride: [2, 1], out_channels: 128}
+  exit_layers: [2, 3, 4, 5]
+  ensemble_mode: ensemble
+
+dataloader:
+  train_shuffle: false
+  test_shuffle: false
